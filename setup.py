@@ -1,7 +1,10 @@
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import os
+import re
+
+from setuptools import setup, find_packages
 
 
 def fpath(name):
@@ -18,21 +21,51 @@ def grep(attrname):
     return strval
 
 
+def strip_comments(l):
+    return l.split('#', 1)[0].strip()
+
+
+def desc():
+    info = read('README.md')
+    try:
+        return info + '\n\n' + read('HISTORY.md').replace('.. :changelog:', '')
+    except IOError:
+        return info
+
+
+def reqs(*f):
+    return [
+        r for r in (
+            strip_comments(l) for l in open(
+                os.path.join(os.getcwd(), *f)).readlines()
+        ) if r]
+
+
 file_text = read(fpath('arrow/__init__.py'))
+install_requires = reqs('requirements.txt')
+
 
 setup(
     name='arrow',
     version=grep('__version__'),
+    author=grep('__author__'),
+    author_email=grep('__email__'),
+    license=grep('__license__'),
     description='Better dates and times for Python',
     url='http://crsmithdev.com/arrow',
-    author='Chris Smith',
-    author_email="crsmithdev@gmail.com",
-    license='Apache 2.0',
-    packages=['arrow'],
+    long_description=desc(),
+    packages=find_packages(exclude=['tests']),
     zip_safe=False,
-    install_requires=[
-        'python-dateutil'
-    ],
+    install_requires=install_requires,
     test_suite="tests",
 )
+
+
+
+
+
+
+
+
+
 
